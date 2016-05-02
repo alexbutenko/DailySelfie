@@ -4,6 +4,6 @@
     tools:context="com.nz.alexbutenko.dailyselfie.MainActivity">
     <item
         android:id="@+id/action_camera"
-        android:icon="@drawable/ic_action_camera"
+        android:icon="@android:drawable/ic_menu_camera"
         app:showAsAction="always" />
 </menu>

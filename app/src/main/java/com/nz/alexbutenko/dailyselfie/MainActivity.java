@@ -1,12 +1,13 @@
 package com.nz.alexbutenko.dailyselfie;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,9 +32,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String JPEG_FILE_PREFIX = "IMG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
     private static final String CAMERA_DIR = "/dcim/";
+    public static final long INTERVAL_TWO_MINUTES = 2 * 60 * 1000;
 
-    String mCurrentPhotoPath;
-    GridView mGridView;
+    private String mCurrentPhotoPath;
+    private GridView mGridView;
+    private AlarmManager mAlarmManager;
+    private Intent mNotificationReceiverIntent;
+    private PendingIntent mNotificationReceiverPendingIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +60,23 @@ public class MainActivity extends AppCompatActivity {
                 context.startActivity(intent);
             }
         });
+
+        // Get the AlarmManager Service
+        mAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        // Create an Intent to broadcast to the AlarmNotificationReceiver
+        mNotificationReceiverIntent = new Intent(MainActivity.this,
+                AlarmNotificationReceiver.class);
+
+        // Create an PendingIntent that holds the NotificationReceiverIntent
+        mNotificationReceiverPendingIntent = PendingIntent.getBroadcast(
+                MainActivity.this, 0, mNotificationReceiverIntent, 0);
+
+        // Set repeating alarm
+        mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + INTERVAL_TWO_MINUTES/2,
+                INTERVAL_TWO_MINUTES,
+                mNotificationReceiverPendingIntent);
     }
 
     @Override
