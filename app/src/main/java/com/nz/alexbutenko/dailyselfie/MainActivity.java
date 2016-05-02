@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 
@@ -43,6 +44,17 @@ public class MainActivity extends AppCompatActivity {
 
         mGridView = (GridView) findViewById(R.id.gridview);
         mGridView.setAdapter(new ImageAdapter(this));
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Context context = view.getContext();
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra(DetailActivity.IMAGE_FILE_PATH, getAlbumDir().listFiles()[position].getAbsolutePath());
+
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -166,51 +178,13 @@ public class MainActivity extends AppCompatActivity {
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setPadding(8, 8, 8, 8);
             } else {
                 imageView = (ImageView) convertView;
             }
 
-            setPic(imageView, getAlbumDir().listFiles()[position].getAbsolutePath());
+            ImageUtils.setPic(imageView, getAlbumDir().listFiles()[position].getAbsolutePath());
 
             return imageView;
-        }
-
-        private void setPic(ImageView imageView, String imageFilePath) {
-
-		/* There isn't enough memory to open up more than a couple camera photos */
-        /* So pre-scale the target bitmap into which the file is decoded */
-
-		/* Get the size of the ImageView */
-            int targetW = imageView.getWidth();
-            int targetH = imageView.getHeight();
-
-		    /* Get the size of the image */
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(imageFilePath, bmOptions);
-            int photoW = bmOptions.outWidth;
-            int photoH = bmOptions.outHeight;
-
-		    /* Figure out which way needs to be reduced less */
-            int scaleFactor = 1;
-            if ((targetW > 0) || (targetH > 0)) {
-                scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-            }
-
-		    /* Set bitmap options to scale the image decode target */
-            bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
-
-		    /* Decode the JPEG file into a Bitmap */
-            Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, bmOptions);
-
-		    /* Associate the Bitmap to the ImageView */
-            imageView.setImageBitmap(bitmap);
-            imageView.setVisibility(View.VISIBLE);
         }
     }
 }
